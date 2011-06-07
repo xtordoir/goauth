@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# set the option for extended regexp fir sed
+ESED="-r"
+unamestr=`uname`
+if [[ "$unamestr" == 'Darwin' ]]; then
+   ESED="-E"
+fi
+
 #######################
 #
 # read options from the command line, store in variables
@@ -12,7 +19,7 @@ getopt() {
 			shift;
 			CONFIGFILE=$1;
 			shift;;
-			"--token")
+			"--tokenfile")
 			shift;
 			TOKENFILE=$1;
 			shift;;
@@ -32,6 +39,8 @@ getopt() {
 			BUCKET=$1; 
 			shift;
 			OBJECT=$1;
+			shift;
+			TARGET=$1;
 			shift;;
 			*)
 			shift;;
@@ -42,19 +51,20 @@ getopt() {
 getopt $@
 if [ -f $TOKENFILE ]
 	then
-	TOKEN=`cat $TOKENFILE | sed -E "s/.*\"access_token\":\"([^\"]+)\".*/\1/"`
+	TOKEN=`cat $TOKENFILE | sed $ESED "s/.*\"access_token\":\"([^\"]+)\".*/\1/"`
 fi
 
 function get {
 	BUCKET=$1
 	OBJECT=$2
+	TARGET=$3
 	URL="https://$BUCKET.commondatastorage.googleapis.com/$OBJECT"
-	echo $URL
-	curl -X GET   \
+	curl -w %{http_code} -X GET   \
 	-H "Authorization: OAuth $TOKEN"  \
 	-H "x-goog-api-version: 2"        \
 	-H "accept: application/json"     \
-	$URL
+	-o $TARGET                        \
+	$URL 2>/dev/null
 }
 
 function put {
@@ -64,17 +74,16 @@ function put {
 	
 	LENGTH=$(cat $FILE | wc -c)
 	URL="https://$BUCKET.commondatastorage.googleapis.com/$OBJECT"
-	curl -X PUT                       \
+	curl  -w %{http_code}  -X PUT                       \
 	-H "Authorization: OAuth $TOKEN"  \
 	-H "x-goog-api-version: 2"        \
 	--data-binary "@$FILE"            \
-	$URL
+	$URL 2>/dev/null
 }
 
 if [ $ACTION = "get" ]
 	then
-	echo "get $BUCKET $OBJECT"
-	get $BUCKET $OBJECT
+	get $BUCKET $OBJECT $TARGET
 elif [ $ACTION = "put" ]
 	then
 	put $SOURCE $BUCKET $OBJECT

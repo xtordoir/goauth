@@ -1,6 +1,14 @@
 #!/bin/bash
 
+# end point for google oauth 
 TOKEN_ENDPOINT="https://accounts.google.com/o/oauth2/token"
+
+# set the option for extended regexp fir sed
+ESED="-r"
+unamestr=`uname`
+if [[ "$unamestr" == 'Darwin' ]]; then
+   ESED="-E"
+fi
 
 # string used for usage
 export HELP_STRING=$(cat <<EOT
@@ -37,7 +45,7 @@ getopt() {
 			shift;
 			CONFIGFILE=$1;
 			shift;;
-			"--token")
+			"--tokenfile")
 			shift;
 			TOKENFILE=$1;
 			shift;;
@@ -72,8 +80,8 @@ fi
 function getTokenFromFile {
 	if [ -f $TOKENFILE ]
 		then
-		TOKEN=`cat $TOKENFILE | sed -E "s/.*\"access_token\":\"([^\"]+)\".*/\1/"`
-		REFRESH_TOKEN=`cat $TOKENFILE | sed -E "s/.*\"refresh_token\":\"([^\"]+)\".*/\1/"`
+		TOKEN=`cat $TOKENFILE | sed $ESED "s/.*\"access_token\":\"([^\"]+)\".*/\1/"`
+		REFRESH_TOKEN=`cat $TOKENFILE | sed $ESED "s/.*\"refresh_token\":\"([^\"]+)\".*/\1/"`
 	fi
 }
 function refreshToken {
