@@ -1,2 +1,24 @@
-goauth: shell tools for oauth 2.0 identifiaction and google storage put and get
+goauth: shell tools for oauth 2.0 identification and google storage put and get methods
 
+
+Google OAuth 2.0 tool
+=====================
+
+goauth.sh <options> command
+
+options are:
+	--conf <configfile>      :  the configuration file containing the application secret, application id and callback url
+	--tokenfile <tokenfile>  :  the file contining the refresh token in the json formt returned by the google server
+
+the command is either "code", "token" or "refresh"
+
+
+Google storage tool
+===================
+
+gs.sh <options> command <arguments>
+
+ options are:
+	--tokenfile <tokenfile>  :  the file contining the refresh token in the json formt returned by the google server
+
+the command is either "put" or "get"
