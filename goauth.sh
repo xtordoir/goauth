@@ -29,7 +29,7 @@ GOAUTH_CALLBACK_URL="__XXX__"
 GOAUTH_CLIENT_ID="__YYY__"
 GOAUTH_CLIENT_SECRET="__XXX__"
 
---token <tokenfile>          : file containing the token and refresh token in the format:
+--tokenfile <tokenfile>          : file containing the token and refresh token in the format:
 -h | --help                  : diplay this help message
 EOT
 )
@@ -80,8 +80,9 @@ fi
 function getTokenFromFile {
 	if [ -f $TOKENFILE ]
 		then
-		TOKEN=`cat $TOKENFILE | sed $ESED "s/.*\"access_token\":\"([^\"]+)\".*/\1/"`
-		REFRESH_TOKEN=`cat $TOKENFILE | sed $ESED "s/.*\"refresh_token\":\"([^\"]+)\".*/\1/"`
+		TOKENFILESTR=`cat $TOKENFILE | tr "\n" " " | tr -d " "`
+		TOKEN=`echo $TOKENFILESTR | sed $ESED "s/.*\"access_token\":\"([^\"]+)\".*/\1/"`
+		REFRESH_TOKEN=`echo $TOKENFILESTR | sed $ESED "s/.*\"refresh_token\":\"([^\"]+)\".*/\1/"`
 	fi
 }
 function refreshToken {
